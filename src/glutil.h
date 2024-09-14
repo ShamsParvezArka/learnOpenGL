@@ -5,18 +5,21 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#define INFO_LOG_BUFFER_SIZE 512
+
 static bool isWireframeModeOn = false;
 
-int gladInit(void);
-static const char *parseShader(const char *shaderPath);
-void framebufferSizeCallback(GLFWwindow *window, int xscale, int yscale);
-void toggleWireframeMode(void);
-void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
-unsigned int createShaderProgram(const char *vertexShaderSourcePath, const char *fragmentShaderSourcePath);
-void useShaderProgram(unsigned int shaderProgram);
+static const char *chfnParseShader(const char *shaderPath);
 
-#ifdef GLUTIL_IMPLEMENTATION
-int gladInit(void)
+int          chfnGladInit(void);
+void         chfnFramebufferSizeCallback(GLFWwindow *window, int xscale, int yscale);
+void         chfnToggleWireframeMode(void);
+void         chfnKeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+unsigned int chfnCreateShaderProgram(const char *vertexShaderSourcePath, const char *fragmentShaderSourcePath);
+void         chfnUseShaderProgram(unsigned int shaderProgram);
+
+#ifdef CHFN_IMPLEMENTATION
+int chfnGladInit(void)
 {
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
     {
@@ -27,7 +30,7 @@ int gladInit(void)
     return(EXIT_SUCCESS);
 }
 
-static const char *parseShader(const char *shaderPath)
+static const char *chfnParseShader(const char *shaderPath)
 {
     FILE *fp = fopen(shaderPath, "rb");
 
@@ -51,14 +54,14 @@ static const char *parseShader(const char *shaderPath)
     return shaderSource;
 }
 
-void framebufferSizeCallback(GLFWwindow *window, int xscale, int yscale)
+void chfnFramebufferSizeCallback(GLFWwindow *window, int xscale, int yscale)
 {
     glViewport(0, 0, xscale, yscale);
 
     return;
 }
 
-void toggleWireframeMode(void)
+void chfnToggleWireframeMode(void)
 {
     if (isWireframeModeOn)
     {
@@ -73,21 +76,21 @@ void toggleWireframeMode(void)
     return;
 }
 
-void keyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
+void chfnKeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods)
 {
     if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
         glfwSetWindowShouldClose(window, GL_TRUE);
     if (key == GLFW_KEY_X && action == GLFW_PRESS)
-        toggleWireframeMode();
+        chfnToggleWireframeMode();
 }
 
-unsigned int createShaderProgram(const char *vertexShaderSourcePath, const char *fragmentShaderSourcePath)
+unsigned int chfnCreateShaderProgram(const char *vertexShaderSourcePath, const char *fragmentShaderSourcePath)
 {
     int success = 0;
-    char infoLog[512];
+    char infoLog[INFO_LOG_BUFFER_SIZE];
 
-    const char *vertexShaderSource = parseShader(vertexShaderSourcePath);
-    const char *fragmentShaderSource = parseShader(fragmentShaderSourcePath);
+    const char *vertexShaderSource = chfnParseShader(vertexShaderSourcePath);
+    const char *fragmentShaderSource = chfnParseShader(fragmentShaderSourcePath);
 
     // Vertex Shader
     unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
@@ -98,7 +101,7 @@ unsigned int createShaderProgram(const char *vertexShaderSourcePath, const char 
     if (success == false)
     {
         glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
-        printf("error: shader compilation failed\n%s\n", infoLog);
+        printf("vertex shader::error: compilation failed\n%s\n", infoLog);
         return(EXIT_FAILURE);
     }
 
@@ -111,7 +114,7 @@ unsigned int createShaderProgram(const char *vertexShaderSourcePath, const char 
     if (success == false)
     {
         glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
-        printf("error: shader compilation failed\n%s\n", infoLog);
+        printf("fragment shader::error: compilation failed\n%s\n", infoLog);
         return(EXIT_FAILURE);
     }
 
@@ -134,7 +137,7 @@ unsigned int createShaderProgram(const char *vertexShaderSourcePath, const char 
     return shaderProgram;
 }
 
-void useShaderProgram(unsigned int shaderProgram)
+void chfnUseShaderProgram(unsigned int shaderProgram)
 {
     glUseProgram(shaderProgram);
 
