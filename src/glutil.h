@@ -15,6 +15,9 @@ int          chfnGladInit(void);
 void         chfnFramebufferSizeCallback(GLFWwindow *window, int xscale, int yscale);
 void         chfnToggleWireframeMode(void);
 void         chfnKeyCallback(GLFWwindow *window, int key, int scancode, int action, int mods);
+unsigned int chfnCreateVBO(unsigned int vertexDataSize, float *vertexData);
+unsigned int chfnCreateVAO(void);
+unsigned int chfnCreateEBO(unsigned int indexDataSize, unsigned int *indexData);
 unsigned int chfnCreateShaderProgram(const char *vertexShaderSourcePath, const char *fragmentShaderSourcePath);
 void         chfnUseShaderProgram(unsigned int shaderProgram);
 
@@ -82,6 +85,48 @@ void chfnKeyCallback(GLFWwindow *window, int key, int scancode, int action, int 
         glfwSetWindowShouldClose(window, GL_TRUE);
     if (key == GLFW_KEY_X && action == GLFW_PRESS)
         chfnToggleWireframeMode();
+}
+
+unsigned int chfnCreateVBO(unsigned int vertexDataSize, float *vertexData)
+{
+    unsigned int vertexBufferObject = 0;
+
+    glGenBuffers(1, &vertexBufferObject);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
+    glBufferData(GL_ARRAY_BUFFER, vertexDataSize, vertexData, GL_STATIC_DRAW);
+
+    return vertexBufferObject;
+}
+
+unsigned int chfnCreateVAO(void)
+{
+    unsigned int vertexArrayObject = 0;
+
+    glGenVertexArrays(1, &vertexArrayObject);
+    glBindVertexArray(vertexArrayObject);
+
+    // position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
+    glEnableVertexAttribArray(0);
+    // color
+    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (3 * sizeof(float)));
+    glEnableVertexAttribArray(1);
+    // texture
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+
+    return vertexArrayObject;
+}
+
+unsigned int chfnCreateEBO(unsigned int indexDataSize, unsigned int *indexData)
+{
+    unsigned int elementBufferObject = 0;
+
+    glGenBuffers(1, &elementBufferObject);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObject);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexDataSize, indexData, GL_STATIC_DRAW);
+
+    return elementBufferObject;
 }
 
 unsigned int chfnCreateShaderProgram(const char *vertexShaderSourcePath, const char *fragmentShaderSourcePath)
