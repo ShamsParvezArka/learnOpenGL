@@ -5,93 +5,23 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
-#define INFO_LOG_BUFFER_SIZE 1024
+#define INFO_LOG_BUFFER_SIZE 512
 
-typedef enum
-{
-    VERTEX_SHADER,
-    FRAGMENT_SHADER,
-} shader_type_t;
-
-static int compilation_status = 0;
-static char info_log[INFO_LOG_BUFFER_SIZE];
 static bool wireframe_mode = false;
 
-static long        get_stream_char_count(FILE *fp);
-static const char *parse_shader(const char *shader_path);
-static void        check_compilation_error(const char *shader, shader_type_t type);
-static void        check_shader_program_compilation_error(unsigned int sp);
+static const char *parse_shader(const char *shaderPath);
 
 int          glad_init(void);
 void         frame_buffer_size_callback(GLFWwindow *window, int xscale, int yscale);
 void         toggle_wireframe_mode(void);
 void         key_callback(GLFWwindow *window, int key, int scancode, int action, int mods);
-unsigned int create_vbo(unsigned int vertex_data_size, float *vertex_data);
+unsigned int create_vbo(unsigned int vertexDataSize, float *vertexData);
 unsigned int create_vao(void);
-unsigned int create_ebo(unsigned int index_data_size, unsigned int *index_data);
-unsigned int create_shader_program(const char *vshader_src_path, const char *fshader_src_path);
-void         use_shader_program(unsigned int sp);
+unsigned int create_ebo(unsigned int indexDataSize, unsigned int *indexData);
+unsigned int create_shader_program(const char *vertexShaderSourcePath, const char *fragmentShaderSourcePath);
+void         use_shader_program(unsigned int shaderProgram);
 
 #ifdef UTIL_IMPLEMENTATION
-
-static long get_stream_char_count(FILE *fp)
-{
-    fseek(fp, 0, SEEK_END);
-    long count = ftell(fp);
-    fseek(fp, 0, SEEK_SET);
-
-    return count;
-}
-
-static const char *parse_shader(const char *shader_path)
-{
-    FILE *fp = fopen(shader_path, "rb");
-    if (fp == NULL)
-    {
-        printf("error: cannot find shader source code\n");
-        return(EXIT_FAILURE);
-    }
-
-    long size = get_stream_char_count(fp);
-    char *shader_src = (char *) malloc(size + 1);
-
-    fread(shader_src, size, 1, fp);
-    shader_src[size] = '\0';
-
-    fclose(fp);
-
-    return shader_src;
-}
-
-static void check_compilation_error(const char *shader, shader_type_t type)
-{
-    glGetShaderiv(shader, GL_COMPILE_STATUS, &compilation_status);
-    if (compilation_status == false)
-    {
-        glGetShaderInfoLog(shader, 512, NULL, info_log);
-
-        if (type == VERTEX_SHADER)
-            printf("vertex_shader::error: compilation failed\n%s\n", info_log);
-        if (type == FRAGMENT_SHADER)
-            printf("fragment_shader::error: compilation failed\n%s\n", info_log);
-
-        return(EXIT_FAILURE);
-    }
-}
-
-static void check_shader_program_compilation_error(unsigned int sp)
-{
-    glGetShaderiv(sp, GL_COMPILE_STATUS, &compilation_status);
-
-    if (!compilation_status)
-    {
-        glGetProgramInfoLog(sp, 512, NULL, info_log);
-        return(EXIT_FAILURE);
-    }
-
-    return;
-}
-
 int glad_init(void)
 {
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
@@ -101,6 +31,30 @@ int glad_init(void)
     }
 
     return(EXIT_SUCCESS);
+}
+
+static const char *parse_shader(const char *shaderPath)
+{
+    FILE *fp = fopen(shaderPath, "rb");
+
+    if (fp == NULL)
+    {
+        printf("error: cannot find shader source code\n");
+        return(EXIT_FAILURE);
+    }
+
+    fseek(fp, 0, SEEK_END);
+    unsigned int size = ftell(fp);
+    fseek(fp, 0, SEEK_SET);
+
+    char *shaderSource = (char *) malloc(size + 1);
+
+    fread(shaderSource, size, 1, fp);
+    shaderSource[size] = '\0';
+
+    fclose(fp);
+
+    return shaderSource;
 }
 
 void frame_buffer_size_callback(GLFWwindow *window, int xscale, int yscale)
@@ -133,15 +87,15 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         toggle_wireframe_mode();
 }
 
-unsigned int create_vbo(unsigned int vertex_data_size, float *vertex_data)
+unsigned int create_vbo(unsigned int vertexDataSize, float *vertexData)
 {
-    unsigned int vertex_buffer_object = 0;
+    unsigned int vertexBufferObject = 0;
 
-    glGenBuffers(1, &vertex_buffer_object);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object);
-    glBufferData(GL_ARRAY_BUFFER, vertex_data_size, vertex_data, GL_STATIC_DRAW);
+    glGenBuffers(1, &vertexBufferObject);
+    glBindBuffer(GL_ARRAY_BUFFER, vertexBufferObject);
+    glBufferData(GL_ARRAY_BUFFER, vertexDataSize, vertexData, GL_STATIC_DRAW);
 
-    return vertex_buffer_object;
+    return vertexBufferObject;
 }
 
 unsigned int create_vao(void)
@@ -164,53 +118,73 @@ unsigned int create_vao(void)
     return vertexArrayObject;
 }
 
-unsigned int create_ebo(unsigned int index_data_size, unsigned int *index_data)
+unsigned int create_ebo(unsigned int indexDataSize, unsigned int *indexData)
 {
     unsigned int elementBufferObject = 0;
 
     glGenBuffers(1, &elementBufferObject);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObject);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_data_size, index_data, GL_STATIC_DRAW);
+    glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexDataSize, indexData, GL_STATIC_DRAW);
 
     return elementBufferObject;
 }
 
-unsigned int create_shader_program(const char *vshader_src_path, const char *fshader_src_path)
-{ 
-    const char *vshader_src = parse_shader(vshader_src_path);
-    const char *fshader_src = parse_shader(fshader_src_path);
+unsigned int create_shader_program(const char *vertexShaderSourcePath, const char *fragmentShaderSourcePath)
+{
+    int success = 0;
+    char infoLog[INFO_LOG_BUFFER_SIZE];
+    
+    const char *vertexShaderSource = parse_shader(vertexShaderSourcePath);
+    const char *fragmentShaderSource = parse_shader(fragmentShaderSourcePath);
 
     // Vertex Shader
-    unsigned int vshader = glCreateShader(GL_VERTEX_SHADER);
-    glShaderSource(vshader, 1, &vshader_src, NULL);
-    glCompileShader(vshader);
+    unsigned int vertexShader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertexShader, 1, &vertexShaderSource, NULL);
+    glCompileShader(vertexShader);
 
-    check_compilation_error(vshader, VERTEX_SHADER);
+    glGetShaderiv(vertexShader, GL_COMPILE_STATUS, &success);
+    if (success == false)
+    {
+        glGetShaderInfoLog(vertexShader, 512, NULL, infoLog);
+        printf("vertex shader::error: compilation failed\n%s\n", infoLog);
+        return(EXIT_FAILURE);
+    }
 
     // Fragment Shader
-    unsigned int fshader = glCreateShader(GL_FRAGMENT_SHADER);
-    glShaderSource(fshader, 1, &fshader_src, NULL);
-    glCompileShader(fshader);
+    unsigned int fragmentShader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragmentShader, 1, &fragmentShaderSource, NULL);
+    glCompileShader(fragmentShader);
 
-    check_compilation_error(fshader, FRAGMENT_SHADER);
+    glGetShaderiv(fragmentShader, GL_COMPILE_STATUS, &success);
+    if (success == false)
+    {
+        glGetShaderInfoLog(fragmentShader, 512, NULL, infoLog);
+        printf("fragment shader::error: compilation failed\n%s\n", infoLog);
+        return(EXIT_FAILURE);
+    }
 
     // Shader Program
-    unsigned int shader_program = glCreateProgram();
-    glAttachShader(shader_program, vshader);
-    glAttachShader(shader_program, fshader);
-    glLinkProgram(shader_program);
+    unsigned int shaderProgram = glCreateProgram();
+    glAttachShader(shaderProgram, vertexShader);
+    glAttachShader(shaderProgram, fragmentShader);
+    glLinkProgram(shaderProgram);
 
-    check_shader_program_compilation_error(shader_program);
+    glGetProgramiv(shaderProgram, GL_COMPILE_STATUS, &success);
+    if (success == false)
+    {
+        glGetProgramInfoLog(shaderProgram, 512, NULL, infoLog);
+        return(EXIT_FAILURE);
+    }
 
-    glDeleteShader(vshader);
-    glDeleteShader(fshader);
+    glDeleteShader(vertexShader);
+    glDeleteShader(fragmentShader);
 
-    return shader_program;
+    return shaderProgram;
 }
 
-void use_shader_program(unsigned int sp)
+void use_shader_program(unsigned int shaderProgram)
 {
-    glUseProgram(sp);
+    glUseProgram(shaderProgram);
 
     return;
 }
