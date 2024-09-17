@@ -3,11 +3,20 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
         
-#define CHFN_IMPLEMENTATION
-#include "glutil.h"
+#define UTIL_IMPLEMENTATION
+#include "util.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
+
+#define WINDOW_WIDTH 800
+#define WINDOW_HEIGHT 600
+#define WINDOW_TITLE "Learning OpenGL"
+
+typedef struct
+{
+    float container[16];
+} mat4_t;
 
 int main()
 {
@@ -16,11 +25,7 @@ int main()
     glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
-    const int windowWidth = 800;
-    const int windowHeight = 600;
-    const char *windowTitle = "Learning OpenGL";
-
-    GLFWwindow *window = glfwCreateWindow(windowWidth, windowHeight, windowTitle, NULL, NULL);
+    GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
     
     if (window == NULL) 
     {
@@ -30,8 +35,8 @@ int main()
     
     glfwMakeContextCurrent(window);
 
-    chfnGladInit();
-    glfwSetFramebufferSizeCallback(window, chfnFramebufferSizeCallback);
+    glad_init();
+    glfwSetFramebufferSizeCallback(window, frame_buffer_size_callback);
 
     float vertices[] = 
     {
@@ -39,7 +44,7 @@ int main()
         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
         0.5f, -0.5f, 0.0f, 0.0f, 1.0f, 0.0f, 1.0f, 0.0f, // bottom right
        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
-       -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f // top left
+       -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
     };
 
     unsigned int indices[] = 
@@ -48,13 +53,13 @@ int main()
         0, 2, 3
     };
 
-    unsigned int shaderProgram = chfnCreateShaderProgram("src/vert.glsl", "src/frag.glsl");
+    unsigned int shaderProgram = create_shader_program("src/main_vert.glsl", "src/main_frag.glsl");
     
     //Vertex buffer object, Vertex array object, Element buffer object
-    unsigned int VBO = chfnCreateVBO(sizeof(vertices), vertices);
-    unsigned int VAO = chfnCreateVAO();
+    unsigned int VBO = create_vbo(sizeof(vertices), vertices);
+    unsigned int VAO = create_vao();
 
-    unsigned int EBO = chfnCreateEBO(sizeof(indices), indices);
+    unsigned int EBO = create_ebo(sizeof(indices), indices);
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
@@ -75,7 +80,7 @@ int main()
 
     if (imageData)
     {
-        //glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
+        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
         glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
         glGenerateMipmap(GL_TEXTURE_2D);
     } else
@@ -86,18 +91,29 @@ int main()
 
     stbi_image_free(imageData);
 
-    unsigned int textureUni = glGetUniformLocation(shaderProgram, "ourTexture");
-    chfnUseShaderProgram(shaderProgram);
+    mat4_t trans =
+    {
+        0.0f, -1.0f, 0.0f, 0.0f,
+        1.0f, 0.0f, 0.0f, 0.0f,
+        0.0f, 0.0f, 1.0f, 0.0f,
+        0.0f, 0.0f, 0.0f, 1.0f
+    };
+
+    unsigned int textureUni = glGetUniformLocation(shaderProgram, "_our_texture");
+    use_shader_program(shaderProgram);
     glUniform1i(textureUni, 0);
 
-    glfwSetKeyCallback(window, chfnKeyCallback);
+    unsigned int transformLoc = glGetUniformLocation(shaderProgram, "_transform");
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, trans.container);
+
+    glfwSetKeyCallback(window, key_callback);
 
     while (!glfwWindowShouldClose(window)) 
     {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT);
 
-        chfnUseShaderProgram(shaderProgram);
+        use_shader_program(shaderProgram);
 
         glBindTexture(GL_TEXTURE_2D, texture);
         glBindVertexArray(VAO);
