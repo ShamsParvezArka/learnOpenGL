@@ -2,21 +2,19 @@
 #include <stdbool.h>
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
-        
-#define UTIL_IMPLEMENTATION
-#include "util.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
 
+#define UTIL_IMPLEMENTATION
+#include "util.h"
+
+#define LGEBRA_IMPLEMENTATION
+#include "lgebra.h"
+
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
 #define WINDOW_TITLE "Learning OpenGL"
-
-typedef struct
-{
-    float container[16];
-} mat4_t;
 
 int main()
 {
@@ -91,20 +89,18 @@ int main()
 
     stbi_image_free(imageData);
 
-    mat4_t trans =
-    {
-        0.0f, -1.0f, 0.0f, 0.0f,
-        1.0f, 0.0f, 0.0f, 0.0f,
-        0.0f, 0.0f, 1.0f, 0.0f,
-        0.0f, 0.0f, 0.0f, 1.0f
-    };
+    mat4_t trans = mat4(IDENTITY);
+    float angle = 45;
+
+    mat4_rotate(&trans, angle, Z_PLANE);
+    mat4_scale(&trans, (vec3_t) { 0.5, 0.5, 0.5 });
 
     unsigned int textureUni = glGetUniformLocation(shaderProgram, "_our_texture");
     use_shader_program(shaderProgram);
     glUniform1i(textureUni, 0);
 
     unsigned int transformLoc = glGetUniformLocation(shaderProgram, "_transform");
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, trans.container);
+    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, trans.m);
 
     glfwSetKeyCallback(window, key_callback);
 
