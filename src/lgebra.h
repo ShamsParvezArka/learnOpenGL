@@ -41,7 +41,7 @@ typedef enum
 
 LGEBRA mat4_t mat4(mat_type_t type);
 LGEBRA mat3_t mat3(mat_type_t type);
-LGEBRA void mat4_rotate(mat4_t *mat_a, float deg, plane_t p);
+LGEBRA void mat4_rotate(mat4_t *mat_a, float angle, vec3_t v);
 LGEBRA void mat4_scale(mat4_t *mat_a, vec3_t v);
 LGEBRA void mat4_ortho(mat4_t *mat_a, float left, float right, float bottom, float top, float near, float far);
 LGEBRA void mat4_perspective(mat4_t *mat_a, float fov, float aspect, float near, float far);
@@ -113,34 +113,25 @@ LGEBRA mat4_t mat4(mat_type_t type)
     }
 }
 
-LGEBRA void mat4_rotate(mat4_t *mat_a, float deg, plane_t p)
+LGEBRA void mat4_rotate(mat4_t *mat_a, float angle, vec3_t r)
 {
-    switch (p)
-    {
-    case X_PLANE:
-        mat_a->m[5] = cosf(DEG_TO_RAD(deg));
-        mat_a->m[6] = -sinf(DEG_TO_RAD(deg));
-        mat_a->m[9] = sinf(DEG_TO_RAD(deg));
-        mat_a->m[10] = cosf(DEG_TO_RAD(deg));
-        break;
-
-    case Y_PLANE:
-        mat_a->m[0] = cosf(DEG_TO_RAD(deg));
-        mat_a->m[2] = sinf(DEG_TO_RAD(deg));
-        mat_a->m[8] = -sinf(DEG_TO_RAD(deg));
-        mat_a->m[10] = cosf(DEG_TO_RAD(deg));
-        break;
-
-    case Z_PLANE:
-        mat_a->m[0] = cosf(DEG_TO_RAD(deg));
-        mat_a->m[1] = -sinf(DEG_TO_RAD(deg));
-        mat_a->m[4] = sinf(DEG_TO_RAD(deg));
-        mat_a->m[5] = cosf(DEG_TO_RAD(deg));
-        break;
-
-    default:
-        break;
-    }
+    float theta = DEG_TO_RAD(angle);
+    mat_a->m[0] = cosf(theta) + r.x * r.x * (1 - cosf(theta));
+    mat_a->m[1] = r.x * r.y * (1 - cosf(theta)) - r.z * sinf(theta);
+    mat_a->m[2] = r.x * r.z * (1 - cosf(theta)) + r.y * sinf(theta);
+    mat_a->m[3] = 0;
+    mat_a->m[4] = r.y * r.x * (1 - cosf(theta)) + r.z * sinf(theta);
+    mat_a->m[5] = cosf(theta) + r.y * r.y * (1 - cosf(theta));
+    mat_a->m[6] = r.y * r.z * (1 - cosf(theta)) - r.x * sinf(theta);
+    mat_a->m[7] = 0;
+    mat_a->m[8] = r.z * r.x * (1 - cosf(theta)) - r.y * sinf(theta);
+    mat_a->m[9] = r.z * r.y * (1 - cosf(theta)) + r.x * sinf(theta);
+    mat_a->m[10] = cosf(theta) + r.z * r.z * (1 - cosf(theta));
+    mat_a->m[11] = 0;
+    mat_a->m[12] = 0;
+    mat_a->m[13] = 0;
+    mat_a->m[14] = 0;
+    mat_a->m[15] = 1;
 
     return;
 }
