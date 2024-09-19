@@ -116,22 +116,18 @@ LGEBRA mat4_t mat4(mat_type_t type)
 LGEBRA void mat4_rotate(mat4_t *mat_a, float angle, vec3_t r)
 {
     float theta = DEG_TO_RAD(angle);
+
     mat_a->m[0] = cosf(theta) + r.x * r.x * (1 - cosf(theta));
     mat_a->m[1] = r.x * r.y * (1 - cosf(theta)) - r.z * sinf(theta);
     mat_a->m[2] = r.x * r.z * (1 - cosf(theta)) + r.y * sinf(theta);
-    mat_a->m[3] = 0;
+
     mat_a->m[4] = r.y * r.x * (1 - cosf(theta)) + r.z * sinf(theta);
     mat_a->m[5] = cosf(theta) + r.y * r.y * (1 - cosf(theta));
     mat_a->m[6] = r.y * r.z * (1 - cosf(theta)) - r.x * sinf(theta);
-    mat_a->m[7] = 0;
+
     mat_a->m[8] = r.z * r.x * (1 - cosf(theta)) - r.y * sinf(theta);
     mat_a->m[9] = r.z * r.y * (1 - cosf(theta)) + r.x * sinf(theta);
     mat_a->m[10] = cosf(theta) + r.z * r.z * (1 - cosf(theta));
-    mat_a->m[11] = 0;
-    mat_a->m[12] = 0;
-    mat_a->m[13] = 0;
-    mat_a->m[14] = 0;
-    mat_a->m[15] = 1;
 
     return;
 }
@@ -169,6 +165,7 @@ LGEBRA void mat4_perspective(mat4_t *mat_a, float fov, float aspect, float near,
     return;
 }
 
+// todo: fix this shit!
 LGEBRA void mat4_translate(mat4_t *mat_a, vec3_t t)
 {
     mat_a->m[3] = t.x;
@@ -177,5 +174,3 @@ LGEBRA void mat4_translate(mat4_t *mat_a, vec3_t t)
 }
 
 #endif
-
-// todo: implement mat3_rotate fn
