@@ -130,11 +130,15 @@
     <ClCompile Include="src\main.c" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="src\main_frag.glsl" />
     <None Include="src\fshader.glsl" />
+    <None Include="src\main_vert.glsl" />
     <None Include="src\vshader.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\glutil.h" />
+    <ClInclude Include="src\lgebra.h" />
+    <ClInclude Include="src\util.h" />
+    <ClInclude Include="src\stb_image.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -22,9 +22,17 @@
   <ItemGroup>
     <None Include="src\fshader.glsl" />
     <None Include="src\vshader.glsl" />
+    <None Include="src\main_frag.glsl" />
+    <None Include="src\main_vert.glsl" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\glutil.h">
+    <ClInclude Include="src\util.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\stb_image.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\lgebra.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>

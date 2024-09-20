@@ -3,14 +3,11 @@
 #include "glad/glad.h"
 #include "GLFW/glfw3.h"
 
-#define STB_IMAGE_IMPLEMENTATION
-#include "stb_image.h"
-
 #define UTIL_IMPLEMENTATION
-#include "util.h"
+#include "../include/util.h"
 
 #define LGEBRA_IMPLEMENTATION
-#include "lgebra.h"
+#include "../include/lgebra.h"
 
 #define WINDOW_WIDTH 800
 #define WINDOW_HEIGHT 600
@@ -24,19 +21,89 @@ int main()
     glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
 
     GLFWwindow *window = glfwCreateWindow(WINDOW_WIDTH, WINDOW_HEIGHT, WINDOW_TITLE, NULL, NULL);
-    
+
     if (window == NULL) 
     {
         printf("error: cannot create GLFW window\n");
         return(EXIT_FAILURE);
     }
-    
+   
     glfwMakeContextCurrent(window);
-
+    
     glad_init();
     glfwSetFramebufferSizeCallback(window, frame_buffer_size_callback);
+    
+#if 0
+    float vertices[] =
+    { //     COORDINATES     /        COLORS      /   TexCoord  //
+        -0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
+        -0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
+         0.5f, 0.0f, -0.5f,     0.83f, 0.70f, 0.44f,	0.0f, 0.0f,
+         0.5f, 0.0f,  0.5f,     0.83f, 0.70f, 0.44f,	5.0f, 0.0f,
+         0.0f, 0.8f,  0.0f,     0.92f, 0.86f, 0.76f,	2.5f, 5.0f
+    };
 
+    // Indices for vertices order
+    GLuint indices[] =
+    {
+        0, 1, 2,
+        0, 2, 3,
+        0, 1, 4,
+        1, 2, 4,
+        2, 3, 4,
+        3, 0, 4
+    };
+#endif
+
+#if 1
     float vertices[] = 
+    {
+    -0.3f, -0.3f, -0.3f,  0.0f, 0.0f,
+     0.3f, -0.3f, -0.3f,  1.0f, 0.0f,
+     0.3f,  0.3f, -0.3f,  1.0f, 1.0f,
+     0.3f,  0.3f, -0.3f,  1.0f, 1.0f,
+    -0.3f,  0.3f, -0.3f,  0.0f, 1.0f,
+    -0.3f, -0.3f, -0.3f,  0.0f, 0.0f,
+
+    -0.3f, -0.3f,  0.3f,  0.0f, 0.0f,
+     0.3f, -0.3f,  0.3f,  1.0f, 0.0f,
+     0.3f,  0.3f,  0.3f,  1.0f, 1.0f,
+     0.3f,  0.3f,  0.3f,  1.0f, 1.0f,
+    -0.3f,  0.3f,  0.3f,  0.0f, 1.0f,
+    -0.3f, -0.3f,  0.3f,  0.0f, 0.0f,
+
+    -0.3f,  0.3f,  0.3f,  1.0f, 0.0f,
+    -0.3f,  0.3f, -0.3f,  1.0f, 1.0f,
+    -0.3f, -0.3f, -0.3f,  0.0f, 1.0f,
+    -0.3f, -0.3f, -0.3f,  0.0f, 1.0f,
+    -0.3f, -0.3f,  0.3f,  0.0f, 0.0f,
+    -0.3f,  0.3f,  0.3f,  1.0f, 0.0f,
+
+     0.3f,  0.3f,  0.3f,  1.0f, 0.0f,
+     0.3f,  0.3f, -0.3f,  1.0f, 1.0f,
+     0.3f, -0.3f, -0.3f,  0.0f, 1.0f,
+     0.3f, -0.3f, -0.3f,  0.0f, 1.0f,
+     0.3f, -0.3f,  0.3f,  0.0f, 0.0f,
+     0.3f,  0.3f,  0.3f,  1.0f, 0.0f,
+
+    -0.3f, -0.3f, -0.3f,  0.0f, 1.0f,
+     0.3f, -0.3f, -0.3f,  1.0f, 1.0f,
+     0.3f, -0.3f,  0.3f,  1.0f, 0.0f,
+     0.3f, -0.3f,  0.3f,  1.0f, 0.0f,
+    -0.3f, -0.3f,  0.3f,  0.0f, 0.0f,
+    -0.3f, -0.3f, -0.3f,  0.0f, 1.0f,
+
+    -0.3f,  0.3f, -0.3f,  0.0f, 1.0f,
+     0.3f,  0.3f, -0.3f,  1.0f, 1.0f,
+     0.3f,  0.3f,  0.3f,  1.0f, 0.0f,
+     0.3f,  0.3f,  0.3f,  1.0f, 0.0f,
+    -0.3f,  0.3f,  0.3f,  0.0f, 0.0f,
+    -0.3f,  0.3f, -0.3f,  0.0f, 1.0f
+};
+#endif
+
+#if 0
+    float vertices[] =
     {
         // positions       // colors         //texture coords
         0.5f,  0.5f, 0.0f, 1.0f, 0.0f, 0.0f, 1.0f, 1.0f, // top right
@@ -44,82 +111,84 @@ int main()
        -0.5f, -0.5f, 0.0f, 0.0f, 0.0f, 1.0f, 0.0f, 0.0f, // bottom left
        -0.5f,  0.5f, 0.0f, 1.0f, 1.0f, 0.0f, 0.0f, 1.0f  // top left
     };
+#endif
 
+#if 1
     unsigned int indices[] = 
     { 
         0, 1, 2,
         0, 2, 3
     };
+#endif
 
-    unsigned int shaderProgram = create_shader_program("src/main_vert.glsl", "src/main_frag.glsl");
+    unsigned int shader_program = create_shader_program("src/main_vert.glsl", "src/main_frag.glsl");
     
-    //Vertex buffer object, Vertex array object, Element buffer object
     unsigned int VBO = create_vbo(sizeof(vertices), vertices);
     unsigned int VAO = create_vao();
+    //unsigned int EBO = create_ebo(sizeof(indices), indices);
 
-    unsigned int EBO = create_ebo(sizeof(indices), indices);
+    // position
+    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) 0);
+    glEnableVertexAttribArray(0);
+    // color
+    //glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (3 * sizeof(float)));
+    //glEnableVertexAttribArray(1);
+    // texture
+    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(float), (void *) (3 * sizeof(float)));
+    glEnableVertexAttribArray(2);
+    
+    
 
     glBindBuffer(GL_ARRAY_BUFFER, 0);
     glBindVertexArray(0);
     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-    unsigned int texture = 0;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    int imageWidth, imageHeight, nrChannel;
-    stbi_set_flip_vertically_on_load(true);
-    unsigned char *imageData = stbi_load("honeypie.png", &imageWidth, &imageHeight, &nrChannel, 0);
-
-    if (imageData)
-    {
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 4);
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, imageWidth, imageHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, imageData);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    } else
-    {
-        printf("error: failed to load texture\n");
-        return(EXIT_FAILURE);
-    }
-
-    stbi_image_free(imageData);
-
-    mat4_t trans = mat4(IDENTITY);
-    float angle = 45;
-
-    mat4_rotate(&trans, angle, Z_PLANE);
-    mat4_scale(&trans, (vec3_t) { 0.5, 0.5, 0.5 });
-
-    unsigned int textureUni = glGetUniformLocation(shaderProgram, "_our_texture");
-    use_shader_program(shaderProgram);
-    glUniform1i(textureUni, 0);
-
-    unsigned int transformLoc = glGetUniformLocation(shaderProgram, "_transform");
-    glUniformMatrix4fv(transformLoc, 1, GL_FALSE, trans.m);
+    unsigned int texture = load_texture("container.jpg", 1);
 
     glfwSetKeyCallback(window, key_callback);
 
+    glEnable(GL_DEPTH_TEST);
     while (!glfwWindowShouldClose(window)) 
     {
         glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        use_shader_program(shaderProgram);
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
         glBindTexture(GL_TEXTURE_2D, texture);
+
+        use_shader_program(shader_program);
+
+        //mat4_perspective(&projection, 90, (float) WINDOW_WIDTH / (float) WINDOW_HEIGHT, 0.1f, 100.0f);
+        mat4_t projection = mat4(IDENTITY);
+        mat4_t view = mat4(IDENTITY);
+        mat4_t model = mat4(IDENTITY);
+
+        mat4_rotate(&model, glfwGetTime() * 50, (vec3_t) { 0.3f, 1.0f, 0.0f });
+        mat4_scale(&model, (vec3_t) { 1.0f, 1.0f, 1.0f });
+        mat4_translate(&view, (vec3_t) { 0.0f, 0.0f, 0.3f }); 
+
+        unsigned int texture_loc = glGetUniformLocation(shader_program, "_our_texture");
+        use_shader_program(shader_program);
+        glUniform1i(texture_loc, 0);
+
+        unsigned int model_loc = glGetUniformLocation(shader_program, "_model");
+        glUniformMatrix4fv(model_loc, 1, GL_FALSE, model.m);
+
+        unsigned int projection_loc = glGetUniformLocation(shader_program, "_projection");
+        glUniformMatrix4fv(projection_loc, 1, GL_FALSE, projection.m);
+
+        unsigned int view_loc = glGetUniformLocation(shader_program, "_view");
+        glUniformMatrix4fv(view_loc, 1, GL_FALSE, view.m);
+
         glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-        //glDrawArrays(GL_TRIANGLES, 0, 6);
+        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+        glDrawArrays(GL_TRIANGLES, 0, 36);
 
         glfwSwapBuffers(window);
         glfwPollEvents();
     }
-    
+
+    glDeleteVertexArrays(1, &VAO);
+    glDeleteBuffers(1, &VBO);
     
     glfwDestroyWindow(window);
     glfwTerminate();

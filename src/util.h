@@ -5,6 +5,9 @@
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "../include/stb_image.h"
+
 #define INFO_LOG_BUFFER_SIZE 1024
 
 typedef enum
@@ -31,6 +34,7 @@ unsigned int create_vao(void);
 unsigned int create_ebo(unsigned int index_data_size, unsigned int *index_data);
 unsigned int create_shader_program(const char *vshader_src_path, const char *fshader_src_path);
 void         use_shader_program(unsigned int sp);
+unsigned int load_texture(const char *image_path, int vflip);
 
 #ifdef UTIL_IMPLEMENTATION
 
@@ -49,7 +53,7 @@ static const char *parse_shader(const char *shader_path)
     if (fp == NULL)
     {
         printf("error: cannot find shader source code\n");
-        return(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     long size = get_stream_char_count(fp);
@@ -75,7 +79,7 @@ static void check_compilation_error(const char *shader, shader_type_t type)
         if (type == FRAGMENT_SHADER)
             printf("fragment_shader::error: compilation failed\n%s\n", info_log);
 
-        return(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 }
 
@@ -86,7 +90,7 @@ static void check_shader_program_compilation_error(unsigned int sp)
     if (!compilation_status)
     {
         glGetProgramInfoLog(sp, 512, NULL, info_log);
-        return(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     return;
@@ -97,7 +101,7 @@ int glad_init(void)
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
     {
         printf("error: failed to initialize GLAD\n");
-        return(EXIT_FAILURE);
+        exit(EXIT_FAILURE);
     }
 
     return(EXIT_SUCCESS);
@@ -131,48 +135,40 @@ void key_callback(GLFWwindow *window, int key, int scancode, int action, int mod
         glfwSetWindowShouldClose(window, GL_TRUE);
     if (key == GLFW_KEY_X && action == GLFW_PRESS)
         toggle_wireframe_mode();
+
+    return;
 }
 
 unsigned int create_vbo(unsigned int vertex_data_size, float *vertex_data)
 {
-    unsigned int vertex_buffer_object = 0;
+    unsigned int vbo = 0;
 
-    glGenBuffers(1, &vertex_buffer_object);
-    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer_object);
+    glGenBuffers(1, &vbo);
+    glBindBuffer(GL_ARRAY_BUFFER, vbo);
     glBufferData(GL_ARRAY_BUFFER, vertex_data_size, vertex_data, GL_STATIC_DRAW);
 
-    return vertex_buffer_object;
+    return vbo;
 }
 
 unsigned int create_vao(void)
 {
-    unsigned int vertexArrayObject = 0;
+    unsigned int vao = 0;
 
-    glGenVertexArrays(1, &vertexArrayObject);
-    glBindVertexArray(vertexArrayObject);
+    glGenVertexArrays(1, &vao);
+    glBindVertexArray(vao);
 
-    // position
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) 0);
-    glEnableVertexAttribArray(0);
-    // color
-    glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (3 * sizeof(float)));
-    glEnableVertexAttribArray(1);
-    // texture
-    glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(float), (void *) (6 * sizeof(float)));
-    glEnableVertexAttribArray(2);
-
-    return vertexArrayObject;
+    return vao;
 }
 
 unsigned int create_ebo(unsigned int index_data_size, unsigned int *index_data)
 {
-    unsigned int elementBufferObject = 0;
+    unsigned int ebo = 0;
 
-    glGenBuffers(1, &elementBufferObject);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elementBufferObject);
+    glGenBuffers(1, &ebo);
+    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
     glBufferData(GL_ELEMENT_ARRAY_BUFFER, index_data_size, index_data, GL_STATIC_DRAW);
 
-    return elementBufferObject;
+    return ebo;
 }
 
 unsigned int create_shader_program(const char *vshader_src_path, const char *fshader_src_path)
@@ -213,6 +209,40 @@ void use_shader_program(unsigned int sp)
     glUseProgram(sp);
 
     return;
+}
+
+unsigned int load_texture(const char *image_path, int vflip)
+{
+    unsigned int tex = 0;
+
+    glGenTextures(1, &tex);
+    glBindTexture(GL_TEXTURE_2D, tex);
+
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+    stbi_set_flip_vertically_on_load(vflip);
+
+    int image_width, image_height, channel;
+    unsigned char *image_data = stbi_load(image_path, &image_width, &image_height, &channel, 0);
+
+    if (image_data)
+    {
+        if (channel == 4)
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, image_width, image_height, 0, GL_RGBA, GL_UNSIGNED_BYTE, image_data);
+        if (channel == 3)
+            glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, image_width, image_height, 0, GL_RGB, GL_UNSIGNED_BYTE, image_data);
+        
+        glGenerateMipmap(GL_TEXTURE_2D);
+    } else
+    {
+        printf("error: failed to load texture\n");
+        exit(EXIT_FAILURE);
+    }
+
+    return tex;
 }
 
 #endif
