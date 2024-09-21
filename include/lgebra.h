@@ -153,9 +153,9 @@ LGEBRA void mat4_rotate(mat4_t *mat_a, float angle, vec3_t r)
 
 LGEBRA mat4_t mat4_scale(mat4_t *mat_a, vec3_t v)
 {
-    mat_a->m[0] *= v.x;
-    mat_a->m[5] *= v.y;
-    mat_a->m[10] *= v.z;
+    mat_a->m[0] = v.x;
+    mat_a->m[5] = v.y;
+    mat_a->m[10] = v.z;
 
     return;
 }
@@ -177,11 +177,11 @@ LGEBRA void mat4_perspective(mat4_t *mat_a, float fov, float aspect, float near,
 {
     float theta = DEG_TO_RAD(fov);
 
-    mat_a->m[0] = 1.0f / (aspect * tanf(theta * 0.5f));
+    mat_a->m[0] = 1.0f / tanf(theta * 0.5f);
     mat_a->m[5] = 1.0f / tanf(theta * 0.5f);
     mat_a->m[10] = (far + near) / (near - far);
-    mat_a->m[11] = (2 * far * near) / (near - far);
-    mat_a->m[14] = -1.0f;
+    mat_a->m[14] = (2 * far * near) / (near - far);
+    mat_a->m[11] = -1.0f;
     mat_a->m[15] = 0.0f;
 
     return;
