@@ -153,9 +153,9 @@ LGEBRA void mat4_rotate(mat4_t *mat_a, float angle, vec3_t r)
 
 LGEBRA mat4_t mat4_scale(mat4_t *mat_a, vec3_t v)
 {
-    mat_a->m[0] = v.x;
-    mat_a->m[5] = v.y;
-    mat_a->m[10] = v.z;
+    mat_a->m[0] *= v.x;
+    mat_a->m[5] *= v.y;
+    mat_a->m[10] *= v.z;
 
     return;
 }
