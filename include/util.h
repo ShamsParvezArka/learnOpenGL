@@ -22,7 +22,7 @@ static bool wireframe_mode = false;
 
 static long        get_stream_char_count(FILE *fp);
 static const char *parse_shader(const char *shader_path);
-static void        check_compilation_error(const char *shader, shader_type_t type);
+static void        check_shader_compilation_error(const char *shader, shader_type_t type);
 static void        check_shader_program_compilation_error(unsigned int sp);
 
 int          glad_init(void);
@@ -67,7 +67,7 @@ static const char *parse_shader(const char *shader_path)
     return shader_src;
 }
 
-static void check_compilation_error(const char *shader, shader_type_t type)
+static void check_shader_compilation_error(const char *shader, shader_type_t type)
 {
     glGetShaderiv(shader, GL_COMPILE_STATUS, &compilation_status);
     if (compilation_status == false)
@@ -181,14 +181,14 @@ unsigned int create_shader_program(const char *vshader_src_path, const char *fsh
     glShaderSource(vshader, 1, &vshader_src, NULL);
     glCompileShader(vshader);
 
-    check_compilation_error(vshader, VERTEX_SHADER);
+    check_shader_compilation_error(vshader, VERTEX_SHADER);
 
     // Fragment Shader
     unsigned int fshader = glCreateShader(GL_FRAGMENT_SHADER);
     glShaderSource(fshader, 1, &fshader_src, NULL);
     glCompileShader(fshader);
 
-    check_compilation_error(fshader, FRAGMENT_SHADER);
+    check_shader_compilation_error(fshader, FRAGMENT_SHADER);
 
     // Shader Program
     unsigned int shader_program = glCreateProgram();
