@@ -46,13 +46,16 @@ static long get_stream_char_count(FILE *fp)
 
     return count;
 }
+#include <string.h>
+
+#define __FILENAME__ (strrchr(__FILE__, '\\') ? strrchr(__FILE__, '\\') + 1 : __FILE__)
 
 static const char *parse_shader(const char *shader_path)
 {
     FILE *fp = fopen(shader_path, "rb");
     if (fp == NULL)
     {
-        printf("error: cannot find shader source code\n");
+        fprintf(stderr, "%s::error: cannot find \"%s\"\n", __FILENAME__, shader_path);
         exit(EXIT_FAILURE);
     }
 
@@ -75,9 +78,9 @@ static void check_shader_compilation_error(const char *shader, shader_type_t typ
         glGetShaderInfoLog(shader, 512, NULL, info_log);
 
         if (type == VERTEX_SHADER)
-            printf("vertex_shader::error: compilation failed\n%s\n", info_log);
+            fprintf(stderr, "%s::vertex_shader::error: compilation failed\n%s\n", __FILENAME__, info_log);
         if (type == FRAGMENT_SHADER)
-            printf("fragment_shader::error: compilation failed\n%s\n", info_log);
+            fprintf(stderr, "%s::fragment_shader::error: compilation failed\n%s\n", __FILENAME__, info_log);
 
         exit(EXIT_FAILURE);
     }
@@ -100,7 +103,7 @@ int glad_init(void)
 {
     if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress))
     {
-        printf("error: failed to initialize GLAD\n");
+        fprintf(stderr, "%s::error: failed to initialize GLAD\n", __FILENAME__);
         exit(EXIT_FAILURE);
     }
 
@@ -238,7 +241,7 @@ unsigned int load_texture(const char *image_path, int vflip)
         glGenerateMipmap(GL_TEXTURE_2D);
     } else
     {
-        printf("error: failed to load texture\n");
+        fprintf(stderr, "%s::error: failed to load texture \"%s\"\n", __FILENAME__, image_path);
         exit(EXIT_FAILURE);
     }
 
